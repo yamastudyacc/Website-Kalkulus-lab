@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulus Lab — Interactive Learning for Electrical Engineering</title>
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Utama -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- MathJax untuk Notasi LaTeX -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Chart.js untuk Grafik Interaktif -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="light-theme">
+
+    <!-- Header / Navbar Utama -->
+    <header class="app-header">
+        <div class="header-left">
+            <button id="sidebar-toggle" class="icon-btn" aria-label="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+            <div class="brand">
+                <i class="fas fa-microchip brand-icon"></i>
+                <h1>Kalkulus<span>Lab</span></h1>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" placeholder="Cari materi, rumus, atau konsep (cth: Bilangan Kompleks, Limit, Turunan)..." aria-label="Cari Materi">
+                <div id="search-results" class="search-dropdown hidden"></div>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <button id="btn-continue" class="btn btn-outline btn-sm"><i class="fas fa-play"></i> Lanjutkan Belajar</button>
+            <div class="header-progress">
+                <div class="progress-info">
+                    <span id="overall-progress-text">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div id="overall-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+            <button id="btn-tools" class="icon-btn" title="Kalkulator & Alat Interaktif" aria-label="Alat Interaktif"><i class="fas fa-calculator"></i></button>
+            <button id="btn-formula" class="icon-btn" title="Daftar Rumus" aria-label="Daftar Rumus"><i class="fas fa-book-bookmark"></i></button>
+            <button id="btn-notes" class="icon-btn" title="Catatan Pribadi" aria-label="Catatan Pribadi"><i class="fas fa-sticky-note"></i></button>
+            <button id="theme-toggle" class="icon-btn" title="Ganti Mode Gelap/Terang" aria-label="Toggle Mode Gelap"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- Sidebar Navigasi Materi -->
+        <aside class="app-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-list-ol"></i> Modul Pembelajaran</h3>
+                <button id="btn-reset-progress" class="text-btn-danger" title="Reset Semua Progres"><i class="fas fa-rotate-left"></i> Reset</button>
+            </div>
+            <nav class="sidebar-nav" id="sidebar-menu">
+                <!-- Menu Bab & Subbab di-render dinamis oleh JavaScript -->
+            </nav>
+        </aside>
+
+        <!-- Dynamic Main Content Area -->
+        <main class="app-main" id="main-content">
+            <!-- Dashboard / Welcome Screen Default -->
+            <div id="dashboard-view" class="view-panel">
+                <div class="welcome-hero">
+                    <div class="hero-text">
+                        <h2>Selamat Datang di <span class="highlight">Kalkulus Lab</span></h2>
+                        <p>Platform interaktif pembelajaran matematika teknik elektro. Pelajari konsep dari dasar, visualisasikan grafik & bilangan kompleks, hingga aplikasi turunan pada rangkaian listrik AC dan sinyal.</p>
+                        <div class="hero-actions">
+                            <button id="btn-start-course" class="btn btn-primary"><i class="fas fa-graduation-cap"></i> Mulai Bab 1: Fondasi Bilangan</button>
+                            <button id="btn-open-tools-dashboard" class="btn btn-secondary"><i class="fas fa-microchip"></i> Buka Kalkulator Kompleks</button>
+                        </div>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat-card">
+                            <i class="fas fa-book-open"></i>
+                            <div>
+                                <h4 id="stat-completed-count">0/0</h4>
+                                <p>Subbab Selesai</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-trophy"></i>
+                            <div>
+                                <h4 id="stat-avg-score">0%</h4>
+                                <p>Rata-rata Kuis</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3><i class="fas fa-compass"></i> Alur Pembelajaran Teknik Elektro</h3>
+                        <div class="roadmap-list">
+                            <div class="roadmap-item active" onclick="loadSubchapter('bab1_sub1')">
+                                <span class="step-num">1</span>
+                                <div>
+                                    <strong>Bab 1: Fondasi Bilangan & Kompleks</strong>
+                                    <p>Sistem bilangan, satuan imajiner $j=\sqrt{-1}$, bidang Argand, dan impedansi AC.</p>
+                                </div>
+                            </div>
+                            <div class="roadmap-item" onclick="loadSubchapter('bab2_sub1')">
+                                <span class="step-num">2</span>
+                                <div>
+                                    <strong>Bab 2: Operasi Matematika Dasar</strong>
+                                    <p>Aljabar, pecahan rasional, eksponen, logaritma, dan faktorisasi.</p>
+                                </div>
+                            </div>
+                            <div class="roadmap-item" onclick="loadSubchapter('bab3_sub1')">
+                                <span class="step-num">3</span>
+                                <div>
+                                    <strong>Bab 3: Fungsi & Grafik Interaktif</strong>
+                                    <p>Fungsi linear, kuadrat, trigonometri sinusoidal, serta transformasi sinyal.</p>
+                                </div>
+                            </div>
+                            <div class="roadmap-item" onclick="loadSubchapter('bab4_sub1')">
+                                <span class="step-num">4</span>
+                                <div>
+                                    <strong>Bab 4: Limit Fungsi & L'Hospital</strong>
+                                    <p>Konsep mendekati titik, kontinitas, bentuk tak tentu, dan aturan L'Hospital.</p>
+                                </div>
+                            </div>
+                            <div class="roadmap-item" onclick="loadSubchapter('bab5_sub1')">
+                                <span class="step-num">5</span>
+                                <div>
+                                    <strong>Bab 5: Aplikasi Turunan</strong>
+                                    <p>Fungsi naik/turun, titik kritis, uji kecekungan, titik belok & optimasi.</p>
+                                </div>
+                            </div>
+                            <div class="roadmap-item" onclick="loadSubchapter('bab6_sub1')">
+                                <span class="step-num">6</span>
+                                <div>
+                                    <strong>Bab 6: Penerapan Teknik Elektro</strong>
+                                    <p>$i(t)=C\frac{dv}{dt}$, $v(t)=L\frac{di}{dt}$, dan transfer daya maksimum.</p>
+                                </div>
+                            </div>
+                            <div class="roadmap-item" onclick="loadSubchapter('bab8_sub1')">
+                                <span class="step-num">7</span>
+                                <div>
+                                    <strong>Bab 8: Evaluasi Akhir Komprehensif</strong>
+                                    <p>Ujian akhir komprehensif menguji pemahaman dari Bab 1 hingga Bab 6.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3><i class="fas fa-clock-rotate-left"></i> Aktivitas Terakhir</h3>
+                        <div id="recent-activity-list" class="activity-list">
+                            <p class="text-muted">Belum ada aktivitas. Mulai pelajari bab pertama untuk mencatat progres!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning View (Rendered dynamically) -->
+            <div id="content-view" class="view-panel hidden">
+                <article class="subchapter-content">
+                    <header class="content-header">
+                        <div class="breadcrumb">
+                            <span id="bc-bab">Bab 1</span> &gt; <span id="bc-subbab">Subbab 1</span>
+                        </div>
+                        <div class="title-action-row">
+                            <h2 id="subchapter-title">Judul Subbab</h2>
+                            <div class="action-buttons">
+                                <button id="btn-bookmark" class="btn-icon-label" onclick="toggleBookmark()"><i class="far fa-bookmark"></i> Bookmark</button>
+                                <button id="btn-complete-subchapter" class="btn btn-sm btn-success" onclick="toggleSubchapterComplete()"><i class="fas fa-check-circle"></i> Tandai Selesai</button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- Section 1: Tujuan Pembelajaran -->
+                    <section class="learning-block block-objectives">
+                        <h4><i class="fas fa-bullseye"></i> Tujuan Pembelajaran</h4>
+                        <ul id="block-objectives-list"></ul>
+                    </section>
+
+                    <!-- Section 2: Konsep Inti -->
+                    <section class="learning-block block-concept">
+                        <h4><i class="fas fa-brain"></i> Konsep Inti</h4>
+                        <div id="block-concept-body"></div>
+                    </section>
+
+                    <!-- Section 3: Analogi -->
+                    <section class="learning-block block-analogy">
+                        <h4><i class="fas fa-lightbulb"></i> Analogi Sederhana</h4>
+                        <div id="block-analogy-body"></div>
+                    </section>
+
+                    <!-- Section 4: Rumus Penting -->
+                    <section class="learning-block block-formulas">
+                        <h4><i class="fas fa-square-root-variable"></i> Rumus & Notasi Utama</h4>
+                        <div id="block-formulas-body" class="formula-box"></div>
+                    </section>
+
+                    <!-- Section 5 & 6: Contoh Soal & Pembahasan Bertahap -->
+                    <section class="learning-block block-examples">
+                        <h4><i class="fas fa-list-check"></i> Contoh Soal & Pembahasan Langkah demi Langkah</h4>
+                        <div id="block-examples-body"></div>
+                    </section>
+
+                    <!-- Section 7: Kesalahan Umum -->
+                    <section class="learning-block block-pitfalls">
+                        <h4><i class="fas fa-triangle-exclamation"></i> Kesalahan Umum (Common Pitfalls)</h4>
+                        <div id="block-pitfalls-body"></div>
+                    </section>
+
+                    <!-- Section 8: Visualisasi Interaktif -->
+                    <section class="learning-block block-visualization">
+                        <h4><i class="fas fa-chart-line"></i> Visualisasi Interaktif & Simulasi</h4>
+                        <div id="block-visualization-body">
+                            <!-- Canvas / Widget Interactive -->
+                        </div>
+                    </section>
+
+                    <!-- Section 9: Aplikasi Teknik Elektro -->
+                    <section class="learning-block block-ee-app">
+                        <h4><i class="fas fa-bolt"></i> Penerapan Pada Teknik Elektro</h4>
+                        <div id="block-ee-app-body"></div>
+                    </section>
+
+                    <!-- Section 10: Latihan Mandiri -->
+                    <section class="learning-block block-practice">
+                        <h4><i class="fas fa-pen-ruler"></i> Latihan Mandiri</h4>
+                        <div id="block-practice-body"></div>
+                    </section>
+
+                    <!-- Section 11: Kuis Interaktif -->
+                    <section class="learning-block block-quiz">
+                        <h4><i class="fas fa-vial"></i> Kuis Evaluasi Subbab</h4>
+                        <div id="block-quiz-body"></div>
+                    </section>
+
+                    <!-- Section 12: Ringkasan -->
+                    <section class="learning-block block-summary">
+                        <h4><i class="fas fa-box-archive"></i> Ringkasan Subbab</h4>
+                        <ul id="block-summary-list"></ul>
+                    </section>
+
+                    <!-- Navigasi Bawah -->
+                    <footer class="subchapter-nav">
+                        <button id="btn-prev-subchapter" class="btn btn-outline" onclick="navigateSubchapter(-1)"><i class="fas fa-arrow-left"></i> Sebelumnya</button>
+                        <button id="btn-next-subchapter" class="btn btn-primary" onclick="navigateSubchapter(1)">Berikutnya <i class="fas fa-arrow-right"></i></button>
+                    </footer>
+                </article>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Tools & Kalkulator -->
+    <div id="modal-tools" class="modal hidden">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3><i class="fas fa-calculator"></i> Laboratorium Kalkulator & Alat Interaktif</h3>
+                <button class="modal-close" onclick="closeModal('modal-tools')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-header">
+                    <button class="tab-btn active" onclick="switchToolTab('tab-complex')">Kalkulator Bilangan Kompleks</button>
+                    <button class="tab-btn" onclick="switchToolTab('tab-derivative')">Kalkulator Turunan Polinomial</button>
+                    <button class="tab-btn" onclick="switchToolTab('tab-plotter')">Plotter Grafik Fungsi Interaktif</button>
+                </div>
+
+                <!-- Tab 1: Complex Number Calculator -->
+                <div id="tab-complex" class="tab-content active">
+                    <p class="tab-desc">Menghitung operasi dua bilangan kompleks $z_1 = a + bj$ dan $z_2 = c + dj$ (Gunakan notasi $j$ khas Teknik Elektro di mana $j^2 = -1$).</p>
+                    <div class="calc-inputs-grid">
+                        <div class="calc-card">
+                            <h4>Bilangan $z_1$</h4>
+                            <div class="input-group">
+                                <label>Bagian Real ($a$):</label>
+                                <input type="number" id="c1-real" value="3" step="any">
+                            </div>
+                            <div class="input-group">
+                                <label>Bagian Imajiner ($b$):</label>
+                                <input type="number" id="c1-imag" value="2" step="any">
+                            </div>
+                        </div>
+                        <div class="calc-card">
+                            <h4>Bilangan $z_2$</h4>
+                            <div class="input-group">
+                                <label>Bagian Real ($c$):</label>
+                                <input type="number" id="c2-real" value="1" step="any">
+                            </div>
+                            <div class="input-group">
+                                <label>Bagian Imajiner ($d$):</label>
+                                <input type="number" id="c2-imag" value="-4" step="any">
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="calculateComplex()"><i class="fas fa-gear"></i> Hitung Hasil Operasi</button>
+                    <div id="complex-result" class="calc-results-box">
+                        <p class="text-muted">Klik tombol di atas untuk melihat Penjumlahan, Pengurangan, Perkalian, Pembagian, Modulus, Konjugat, dan Bentuk Polar ($r e^{j\theta}$).</p>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Derivative Calculator -->
+                <div id="tab-derivative" class="tab-content">
+                    <p class="tab-desc">Kalkulator turunan polinomial bentuk $f(x) = a_n x^n + a_{n-1} x^{n-1} + \dots + a_0$. Masukkan koefisien polinomial untuk menghitung $f'(x)$ dan $f''(x)$.</p>
+                    <div class="input-group">
+                        <label>Masukkan Polinomial (Contoh: <code>3x^3 - 4x^2 + 5x - 7</code>):</label>
+                        <input type="text" id="poly-input" value="3x^3 - 4x^2 + 5x - 7">
+                    </div>
+                    <button class="btn btn-primary" onclick="calculatePolynomialDerivative()"><i class="fas fa-square-root-variable"></i> Hitung Turunan Pertama & Kedua</button>
+                    <div id="poly-result" class="calc-results-box margin-top"></div>
+                </div>
+
+                <!-- Tab 3: Graph Plotter -->
+                <div id="tab-plotter" class="tab-content">
+                    <p class="tab-desc">Simulasi visual interaktif untuk kurva $f(x)$ dan garis singgung $f'(x)$.</p>
+                    <div class="plotter-controls">
+                        <div class="input-group inline">
+                            <label>Pilih Fungsi:</label>
+                            <select id="plotter-func-select" onchange="renderPlotterCanvas()">
+                                <option value="x^2">f(x) = x² (Parabola)</option>
+                                <option value="x^3 - 3x">f(x) = x³ - 3x (Polinomial Derajat 3)</option>
+                                <option value="sin(x)">f(x) = sin(x) (Gelombang Sinusoidal AC)</option>
+                                <option value="exp(-x)*cos(x)">f(x) = e^(-x) cos(x) (Sinyal Terredam Transient)</option>
+                            </select>
+                        </div>
+                        <div class="input-group inline">
+                            <label>Titik Evaluasi $x_0$:</label>
+                            <input type="range" id="plotter-x-slider" min="-3" max="3" step="0.1" value="1" oninput="renderPlotterCanvas()">
+                            <span id="plotter-x-val">1.0</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="custom-plotter-canvas" height="280"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Daftar Rumus -->
+    <div id="modal-formula" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-book-bookmark"></i> Lembar Formula Penting Kalkulus & Elektro</h3>
+                <button class="modal-close" onclick="closeModal('modal-formula')">&times;</button>
+            </div>
+            <div class="modal-body" id="formula-sheet-body">
+                <!-- Formula Rendered Dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Catatan Pribadi -->
+    <div id="modal-notes" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-sticky-note"></i> Catatan Belajar Pribadi</h3>
+                <button class="modal-close" onclick="closeModal('modal-notes')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="personal-notes-text" placeholder="Tulis catatan penting, pertanyaan, atau ringkasan rumus Anda di sini. Catatan tersimpan secara otomatis di LocalStorage browser..." rows="12"></textarea>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" onclick="savePersonalNotes()"><i class="fas fa-save"></i> Simpan Catatan</button>
+                    <span id="notes-status-msg" class="text-success hidden"><i class="fas fa-check"></i> Tersimpan!</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Bookmarks -->
+    <div id="modal-bookmarks" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-bookmark"></i> Subbab Tersimpan (Bookmarks)</h3>
+                <button class="modal-close" onclick="closeModal('modal-bookmarks')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <ul id="bookmarks-list" class="simple-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
